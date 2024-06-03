@@ -1,83 +1,143 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import Die from './Die'
-import {nanoid} from 'nanoid'
-import Confetti from "react-confetti"
+import { useEffect, useState } from "react";
+import "./App.css";
+import Die from "./Die";
+import { nanoid } from "nanoid";
+import Confetti from "react-confetti";
 
 function App() {
-  const [dice, setDice] = useState(allNewDice())
-  const [tenzies, setTenzies] = useState(false)
+  const [dice, setDice] = useState(allNewDice());
+  const [tenzies, setTenzies] = useState(false);
+  const [start, setStart] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [hours, setHours] = useState(0);
+  const [roll, setRoll] = useState(0);
+
+  if (seconds > 59) {
+    setSeconds(0)
+    setMinutes(minute => minute + 1)
+  }
+  if (minutes > 59) {
+    setMinutes(0)
+    setHours(hour => hour + 1)
+  }
+  if (hours > 23) {
+    setSeconds(0)
+    setMinutes(0)
+    setHours(0)
+  }
 
   useEffect(() => {
-    const allHeld = dice.every(die => die.isHeld == true)
-    const firstValue = dice[0].value
-    const allSameValue = dice.every(die => die.value === firstValue)
+    let timer = setInterval(() => {
+      if (start) {
+        return
+      }
+      if (tenzies) {
+        return
+      }
+      setSeconds(second => second + 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [!start, !tenzies])
+
+  useEffect(() => {
+    const allHeld = dice.every((die) => die.isHeld == true);
+    const firstValue = dice[0].value;
+    const allSameValue = dice.every((die) => die.value === firstValue);
     if (allHeld && allSameValue) {
-      setTenzies(true)
-      console.log("You Won!")
+      setTenzies(true);
     }
-  })
+  });
 
   function generateNewDie() {
-   return {
+    return {
       value: Math.ceil(Math.random() * 6),
       isHeld: false,
-      id: nanoid()
-    }
+      id: nanoid(),
+    };
   }
 
   function allNewDice() {
-    const newDice = []
-    for (let i=0; i<10; i++) {
-      newDice.push(generateNewDie())  
+    const newDice = [];
+    for (let i = 0; i < 10; i++) {
+      newDice.push(generateNewDie());
     }
-    return newDice
+    return newDice;
   }
 
-function rollDice() {
-  if(!tenzies) {
-    setDice(oldDice => oldDice.map(die => {
-      return die.isHeld ?
-      die:
-      generateNewDie() 
-  
-    }))
-  } else {
-      setTenzies(false)
-      setDice(allNewDice())
+  function rollDice() {
+    if (tenzies) {
+      setHours(0);
+      setMinutes(0);
+      setSeconds(0);
+      setStart(false);
+      setDice(allNewDice());
+      setRoll(0);
+    }
+
+    if (!tenzies) {
+      setDice((oldDice) =>
+        oldDice.map((die) => {
+          return die.isHeld ? die : generateNewDie();
+        })
+      );
+      setRoll(x => x + 1)
+    } else {
+      setTenzies(false);
+      setDice(allNewDice());
+    }
   }
-  
-}
 
-function holdDice(id) {
-  setDice(oldDice => oldDice.map(die => {
-    return die.id === id ?
-    {...die, isHeld: !die.isHeld}:
-    die
-  }))
-}
+  function holdDice(id) {
+    // setStart(true)
+    if (tenzies){
+      return
+    }
+    setDice((oldDice) =>
+      oldDice.map((die) => {
+        return die.id === id ? { ...die, isHeld: !die.isHeld } : die;
+      })
+    );
+  }
 
-const diceElement = dice.map(die => 
-  <Die 
-    key={die.id} 
-    value={die.value} 
-    isHeld={die.isHeld} 
-    holdDice={() => holdDice(die.id)}
-  />)
+  const diceElement = dice.map((die) => (
+    <Die
+      key={die.id}
+      value={die.value}
+      isHeld={die.isHeld}
+      holdDice={() => holdDice(die.id)}
+    />
+  ));
 
-return (
+  return (
     <main>
-        {tenzies && <Confetti />}
-        <h1 className="title">Tenzies</h1>
-        <p className="instructions">Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
-        <div className='dice-container'>
-            {diceElement}
+      {tenzies && <Confetti />}
+      {!start && <h1 className="title">Tenzies</h1>}
+      {!start && (
+        <p className="instructions">
+          Roll until all dice are the same. Click each die to freeze it at its
+          current value between rolls.
+        </p>
+      )}
+
+      {!start && (
+        <div className="start-menu">
+          <h1 className="timer">
+            Time {String(hours).padStart(2, "0")}:
+            {String(minutes).padStart(2, "0")}:
+            {String(seconds).padStart(2, "0")}
+          </h1>
+          <h1 className="count-roll">Count: {roll}</h1>
         </div>
-        <button className='roll-dice' onClick={rollDice}>
-          {tenzies ? "New Game" : "Roll"}
-        </button>
+      )}
+      
+      <div className="dice-container">{diceElement}</div>
+      <button className="roll-dice" onClick={rollDice}>
+        {tenzies ? "New Game" : "Roll"}
+      </button>
     </main>
-  )
+  );
 }
 
-export default App
+export default App;
