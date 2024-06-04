@@ -3,6 +3,18 @@
   /* border: 1px solid black; */
 }
 
+#light {
+  background-color: #fff;
+}
+
+#dark {
+  background-color: #000;
+}
+
+#dark .instructions, #dark .start-menu {
+  color: #686565;
+}
+
 body {
   margin: 0;
   background-color: #0B2434;
@@ -10,7 +22,7 @@ body {
   font-family: 'Karla', sans-serif;
 }
 
-main {
+.main {
   background-color: #F5F5F5;
   height: 500px;
   border-radius: 5px;
@@ -21,9 +33,11 @@ main {
   align-items: center;
 }
 
+
 .title {
   font-size: 40px;
   margin: 0;
+  color: rgb(133, 250, 55);
 }
 
 .instructions {
@@ -33,7 +47,19 @@ main {
   text-align: center;
 }
 
+.count-roll{
+  font-size: 1.1rem;
+}
 
+.timer{
+  font-size: 1.1rem;
+}
+.start-menu{
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  justify-content: center;
+}
 
 .dice-container {
   display: grid;
@@ -115,23 +141,16 @@ main {
   box-shadow: inset 5px 5px 10px -3px rgba(0, 0, 0, 0.7);
 }
 
-.count-roll{
-  font-size: 1.1rem;
-}
-
-.timer{
-  font-size: 1.1rem;
-}
-.start-menu{
-  display: flex;
-  gap: .5rem;
-  align-items: center;
-  justify-content: center;
-  margin-top: .8rem;
-}
-
 @media only screen and (max-width: 500px) {
-  main {
+  .switch {
+  display: flex;
+  width: 20px;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+  .main {
     height: auto;
   }
   .dice-container{

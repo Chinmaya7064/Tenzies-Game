@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import "./App.css";
 import Die from "./Die";
 import { nanoid } from "nanoid";
 import Confetti from "react-confetti";
+import ReactSwitch from "react-switch";
+
+export const ThemeContext = createContext(null);
 
 function App() {
   const [dice, setDice] = useState(allNewDice());
@@ -12,7 +15,16 @@ function App() {
   const [minutes, setMinutes] = useState(0);
   const [hours, setHours] = useState(0);
   const [roll, setRoll] = useState(0);
+  const [theme, setTheme] = useState("dark");
 
+//Theme Mode start
+const toggleTheme = () => {
+  setTheme((curr) => (curr === "light" ? "dark" : "light"));
+}
+//Theme Mode End
+
+
+// Timer start
   if (seconds > 59) {
     setSeconds(0)
     setMinutes(minute => minute + 1)
@@ -40,7 +52,9 @@ function App() {
 
     return () => clearInterval(timer)
   }, [!start, !tenzies])
+// Timer End
 
+// Dice function start
   useEffect(() => {
     const allHeld = dice.every((die) => die.isHeld == true);
     const firstValue = dice[0].value;
@@ -109,34 +123,45 @@ function App() {
       holdDice={() => holdDice(die.id)}
     />
   ));
+// Dice function End
+
 
   return (
-    <main>
-      {tenzies && <Confetti />}
-      {!start && <h1 className="title">Tenzies</h1>}
-      {!start && (
-        <p className="instructions">
-          Roll until all dice are the same. Click each die to freeze it at its
-          current value between rolls.
-        </p>
-      )}
+    <ThemeContext.Provider value={{theme, toggleTheme}}>
+          <div className="main" id={theme}>
+          {tenzies && <Confetti />}
+        {!start && <h1 className="title">Tenzies</h1>}
+          <div className="switch">
+            <ReactSwitch onChange={toggleTheme} checked={theme === "dark"} />
+          </div>
+          {!start && (
+            <p className="instructions">
+              Roll until all dice are the same. Click each die to freeze it at its
+              current value between rolls.
+            </p>
+          )}
 
-      {!start && (
-        <div className="start-menu">
-          <h1 className="timer">
-            Time {String(hours).padStart(2, "0")}:
-            {String(minutes).padStart(2, "0")}:
-            {String(seconds).padStart(2, "0")}
-          </h1>
-          <h1 className="count-roll">Count: {roll}</h1>
+          {!start && (
+            <div className="start-menu">
+              <h1 className="timer">
+                Time {String(hours).padStart(2, "0")}:
+                {String(minutes).padStart(2, "0")}:
+                {String(seconds).padStart(2, "0")}
+              </h1>
+              <h1 className="count-roll">Count: {roll}</h1>
+            </div>
+          )}
+
+          {/* <div>
+            <ReactSwitch className="switch" />
+          </div> */}
+          
+          <div className="dice-container">{diceElement}</div>
+          <button className="roll-dice" onClick={rollDice}>
+            {tenzies ? "New Game" : "Roll"}
+          </button>
         </div>
-      )}
-      
-      <div className="dice-container">{diceElement}</div>
-      <button className="roll-dice" onClick={rollDice}>
-        {tenzies ? "New Game" : "Roll"}
-      </button>
-    </main>
+    </ThemeContext.Provider>
   );
 }
 
